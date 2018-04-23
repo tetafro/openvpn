@@ -2,6 +2,8 @@
 
 OpenVPN with a simple init process inside docker container.
 
+This image is available on [Docker Hub](https://hub.docker.com/r/tetafro/openvpn/).
+
 ## Server
 
 Make directory for OpenVPN configs. Start docker container and
@@ -31,3 +33,7 @@ Ubuntu example:
 sudo apt install openvpn
 sudo openvpn --config client.conf
 ```
+
+---
+
+[Original project](https://github.com/jpetazzo/dockvpn)
