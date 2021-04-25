@@ -5,6 +5,7 @@ cd /etc/openvpn
 
 # Init on first run
 if [ ! -f /key.pem ]; then
+    # Generate server config
     mkdir -p /dev/net
     if [ ! -c /dev/net/tun ]; then
         mknod /dev/net/tun c 10 200
@@ -17,10 +18,8 @@ if [ ! -f /key.pem ]; then
     openssl x509 -req -in csr.pem -out cert.pem -signkey key.pem -days 24855
 
     cp /tpl/server.conf server.conf
-fi
 
-# Generate client config if not exists
-if [ ! -f /key.pem ]; then
+    # Generate client config
     ADDR=$(curl -s http://myip.enix.org/REMOTE_ADDR)
     if [ -z "$ADDR" ]; then
         echo "Failed to get public IP address"
