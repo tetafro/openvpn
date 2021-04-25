@@ -4,7 +4,7 @@ set -e
 cd /etc/openvpn
 
 # Init on first run
-if [ ! -f /key.pem ]; then
+if [ ! -f key.pem ]; then
     # Generate server config
     mkdir -p /dev/net
     if [ ! -c /dev/net/tun ]; then
@@ -25,9 +25,9 @@ if [ ! -f /key.pem ]; then
         echo "Failed to get public IP address"
         exit 1
     fi
-    KEY="$(cat key.pem)" \
-    CERT="$(cat cert.pem)" \
-    DH="$(cat dh.pem)" \
+    KEY="$(cat key.pem)"
+    CERT="$(cat cert.pem)"
+    DH="$(cat dh.pem)"
     eval "echo \"$(cat /tpl/client.conf)\"" > client.conf
 fi
 
