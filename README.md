@@ -1,5 +1,7 @@
 # Docker OpenVPN
 
+[![Release](https://img.shields.io/github/tag/tetafro/openvpn.svg)](https://github.com/tetafro/openvpn/releases)
+
 OpenVPN with a simple init process inside docker container.
 
 This image is available on [Docker Hub](https://hub.docker.com/r/tetafro/openvpn/).
