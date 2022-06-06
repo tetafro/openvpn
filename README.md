@@ -4,8 +4,6 @@
 
 OpenVPN with a simple init process inside a docker container.
 
-This image is available on [Docker Hub](https://hub.docker.com/r/tetafro/openvpn/).
-
 ## Server
 
 Make a directory for OpenVPN configs. Start a docker container and
@@ -20,7 +18,7 @@ docker run --detach \
     --publish 1194:1194/udp \
     --volume $(pwd):/etc/openvpn \
     --name openvpn \
-    tetafro/openvpn
+    ghcr.io/tetafro/openvpn
 ```
 
 ## Client
@@ -33,7 +31,7 @@ Ubuntu example:
 
 ```sh
 scp your-vpn-server:/home/user/vpn/client.conf .
-sudo apt install openvpn
+sudo apt install openvpn openvpn-systemd-resolved
 sudo openvpn --config client.conf
 ```
 
