@@ -17,5 +17,4 @@ VOLUME /etc/openvpn
 
 EXPOSE 1194/udp
 
-ENTRYPOINT ["/vpn/vpn.sh"]
-CMD ["run-server"]
+CMD ["/vpn/vpn.sh", "run-server"]

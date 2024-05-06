@@ -26,7 +26,7 @@ docker run --detach \
 Generate a new client config file (you can generate as many as you want):
 
 ```sh
-docker exec -it openvpn add-client
+docker exec -it openvpn /vpn/vpn.sh add-client
 ```
 
 `vpn/client_N.conf`, generated on the previous step, is a full config with
@@ -51,7 +51,7 @@ docker run --rm -it \
     --volume $(pwd)/conf:/etc/openvpn \
     --name openvpn \
     localhost/openvpn
-docker exec -it openvpn add-client
+docker exec -it openvpn /vpn/vpn.sh add-client
 ```
 
 ---
