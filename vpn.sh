@@ -1,11 +1,16 @@
 #!/bin/bash
 set -euo pipefail
 
-if [[ $# -ne 1 ]]; then
-    echo "USAGE: $0 [run-server|add-client]"
+if [[ $# -lt 1 ]]; then
+    echo "USAGE: $0 [run-server|add-client] [subnet]"
     exit 1
 fi
 cmd=$1
+
+export subnet="192.168.23.0"
+if [[ "$cmd" == "run-server" && $# -eq 2 ]]; then
+    export subnet=$2
+fi
 
 function init_server {
     mkdir -p /dev/net
@@ -41,11 +46,11 @@ function init_server {
         -days 3650 \
         -out server.crt
 
-    cp /vpn/openvpn_server.conf server.conf
+    envsubst < /vpn/openvpn_server.conf > server.conf
 }
 
 function init_client {
-    addr=$(curl -s http://myip.enix.org/REMOTE_ADDR)
+    export addr=$(curl -s http://myip.enix.org/REMOTE_ADDR)
     if [ -z "$addr" ]; then
         echo 'Failed to get public IP address'
         exit 1
@@ -67,13 +72,13 @@ function init_client {
         -days 3650 \
         -out client.crt
 
-    key="$(cat client.key)"
-    cert="$(cat client.crt)"
-    ca="$(cat ca.crt)"
-    dh="$(cat dh.pem)"
+    export key="$(cat client.key)"
+    export cert="$(cat client.crt)"
+    export ca="$(cat ca.crt)"
+    export dh="$(cat dh.pem)"
     count=$(find . -name 'client*.conf' | wc -l)
     count=$((count+1))
-    eval "echo \"$(cat /vpn/openvpn_client.conf)\"" > "client_${count}.conf"
+    envsubst < /vpn/openvpn_client.conf > "client_${count}.conf"
     echo "New client config file: client_${count}.conf"
 
     # Cleanup
@@ -87,7 +92,7 @@ case $cmd in
         if [ ! -f server.crt ]; then
             init_server
         fi
-        iptables -t nat -A POSTROUTING -s 192.168.23.0/24 -o eth0 -j MASQUERADE
+        iptables -t nat -A POSTROUTING -s $subnet/24 -o eth0 -j MASQUERADE
         openvpn server.conf
     ;;
     add-client )

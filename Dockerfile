@@ -4,7 +4,7 @@ LABEL maintainer="Denis Krivak"
 WORKDIR /etc/openvpn
 
 RUN apt update && \
-    apt install -y curl openssl openvpn iptables
+    apt install -y curl gettext-base openssl openvpn iptables
 
 COPY vpn.sh /vpn/
 COPY openvpn_client.conf \
