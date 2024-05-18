@@ -29,9 +29,9 @@ Generate a new client config file (you can generate as many as you want):
 docker exec -it openvpn /vpn/vpn.sh add-client
 ```
 
-`vpn/client_N.conf`, generated on the previous step, is a full config with
-key, certificate and external address. Just take it to your client machine
-and run with a client app.
+The above command will generate `client_N.conf` file, which is a full config
+with a private key and certificates. Just take it to your client machine and
+run with your client app.
 
 Ubuntu example:
 
