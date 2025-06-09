@@ -90,8 +90,11 @@ case $cmd in
     run-server )
         # Init on first run
         if [ ! -f server.crt ]; then
+            echo "Running server init..."
             init_server
         fi
+
+        echo "Starting OpenVPN server..."
         iptables -t nat -A POSTROUTING -s $subnet/24 -o eth0 -j MASQUERADE
         openvpn server.conf
     ;;

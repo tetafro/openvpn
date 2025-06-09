@@ -9,7 +9,8 @@ RUN apt update && \
         curl \
         gettext-base \
         openssl \
-        iptables
+        iptables && \
+    mkdir -p /var/log/openvpn
 
 COPY vpn.sh /vpn/
 COPY openvpn_client.conf \
