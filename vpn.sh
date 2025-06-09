@@ -99,7 +99,7 @@ case $cmd in
         init_client
     ;;
     *)
-        echo 'Unknown command'
+        echo "Unknown command"
         exit 1
     ;;
 esac
