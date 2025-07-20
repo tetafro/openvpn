@@ -5,7 +5,7 @@ WORKDIR /etc/openvpn
 
 RUN apt update && \
     apt install -y \
-        openvpn=2.5.11-0ubuntu0.22.04.1 \
+        openvpn=2.6.12-0ubuntu0.22.04.1 \
         curl \
         gettext-base \
         openssl \
