@@ -50,6 +50,8 @@ function init_server {
 }
 
 function init_client {
+    $ttl=$1
+
     export addr=$(curl -s http://myip.enix.org/REMOTE_ADDR)
     if [ -z "$addr" ]; then
         echo 'Failed to get public IP address'
@@ -69,7 +71,7 @@ function init_client {
         -extfile /vpn/openssl_node.conf \
         -extensions ca_ext \
         -in client.csr \
-        -days 3650 \
+        -days $ttl \
         -out client.crt
 
     export key="$(cat client.key)"
@@ -99,7 +101,8 @@ case $cmd in
         openvpn server.conf
     ;;
     add-client )
-        init_client
+        ttl=${2:-3650}
+        init_client $ttl
     ;;
     *)
         echo "Unknown command"

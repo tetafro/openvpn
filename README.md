@@ -26,7 +26,7 @@ docker run --detach \
 Generate a new client config file (you can generate as many as you want):
 
 ```sh
-docker exec -it openvpn /vpn/vpn.sh add-client
+docker exec -it openvpn /vpn/vpn.sh add-client [TTL_DAYS]
 ```
 
 The above command will generate `client_N.conf` file, which is a full config
