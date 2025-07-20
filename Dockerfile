@@ -1,11 +1,11 @@
-FROM ubuntu:22.04
+FROM ubuntu:24.04
 LABEL maintainer="Denis Krivak"
 
 WORKDIR /etc/openvpn
 
 RUN apt update && \
     apt install -y \
-        openvpn=2.6.12-0ubuntu0.22.04.1 \
+        openvpn=2.6.14-0ubuntu0.24.04.1 \
         curl \
         gettext-base \
         openssl \
