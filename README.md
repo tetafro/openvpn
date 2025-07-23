@@ -4,6 +4,8 @@
 
 OpenVPN with a simple init process inside a docker container.
 
+
+
 ## Server
 
 Make a directory for OpenVPN configs. Start a docker container and mount
@@ -11,47 +13,59 @@ configs directory as a volume.
 
 ```sh
 mkdir vpn
-cd vpn
 docker run --detach \
     --privileged \
     --restart unless-stopped \
     --publish 1194:1194/udp \
-    --volume $(pwd):/etc/openvpn \
+    --volume $(pwd)/vpn:/etc/openvpn \
     --name openvpn \
     ghcr.io/tetafro/openvpn
 ```
 
 ## Clients
 
+### Add
+
 Generate a new client config file (you can generate as many as you want):
 
 ```sh
-docker exec -it openvpn /vpn/vpn.sh add-client [TTL_DAYS]
+docker exec -it openvpn add-client [NAME] [TTL_DAYS]
 ```
 
-The above command will generate `client_N.conf` file, which is a full config
-with a private key and certificates. Just take it to your client machine and
-run with your client app.
+### Connect
+
+The above command will generate `vpn/clients/NAME.conf` file (in the mounted
+directory that we created above), which is a full config with a private key and
+certificates. Just take it to your client machine and run with your client app.
 
 Ubuntu example:
 
 ```sh
-scp your-vpn-server:/home/user/vpn/client.conf .
 sudo apt install openvpn openvpn-systemd-resolved
 sudo openvpn --config client.conf
+```
+
+### Revoke
+
+Note that clients configs need to be stored on the server to be able to revoke
+them.
+
+```sh
+docker exec -it openvpn revoke-client [NAME]
 ```
 
 ## Development
 
 ```sh
 docker build -t localhost/openvpn .
+mkdir -p conf
 docker run --rm -it \
     --privileged \
     --publish 1194:1194/udp \
     --volume $(pwd)/conf:/etc/openvpn \
     --name openvpn \
     localhost/openvpn
-docker exec -it openvpn /vpn/vpn.sh add-client
+docker exec -it openvpn add-client bob 10
 ```
 
 ---

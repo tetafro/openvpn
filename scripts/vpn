@@ -1,0 +1,185 @@
+#!/bin/bash
+set -euo pipefail
+
+if [[ $# -lt 1 ]]; then
+    echo "USAGE: $0 [run-server|add-client|revoke-client]"
+    exit 1
+fi
+cmd=$1
+
+configs=/etc/openvpn
+setup=/etc/openvpn-setup
+subnet="192.168.23.0"
+
+function init_server {
+    mkdir -p /dev/net
+    if [ ! -c /dev/net/tun ]; then
+        mknod /dev/net/tun c 10 200
+    fi
+
+    export cn="openvpn-server"
+
+    echo "Generating CA..."
+    export constraints="CA:TRUE, pathlen:0"
+    envsubst < $setup/req.conf > /tmp/req.conf
+    openssl req -new -x509 \
+        -nodes \
+        -days 3650 \
+        -config /tmp/req.conf \
+        -keyout $configs/ca.key \
+        -out $configs/ca.crt
+    chmod 600 $configs/ca.key
+
+    echo "Generating Diffie-Hellman parameters..."
+    openssl dhparam -out $configs/dh.pem 2048
+
+    echo "Generating server certificate..."
+    export constraints="CA:FALSE"
+    envsubst < $setup/req.conf > /tmp/req.conf
+    openssl req -new \
+        -nodes \
+        -config /tmp/req.conf \
+        -keyout /tmp/server.key \
+        -out /tmp/server.csr
+    openssl x509 -req \
+        -CA $configs/ca.crt \
+        -CAkey $configs/ca.key \
+        -CAcreateserial \
+        -extfile /tmp/req.conf \
+        -extensions ca_ext \
+        -in /tmp/server.csr \
+        -days 3650 \
+        -out /tmp/server.crt
+
+    export key="$(cat /tmp/server.key)"
+    export cert="$(cat /tmp/server.crt)"
+    export ca="$(cat $configs/ca.crt)"
+    export dh="$(cat $configs/dh.pem)"
+    envsubst < $setup/server.conf > $configs/server.conf
+
+    # Cleanup
+    rm -f /tmp/req.conf \
+        /tmp/server.csr \
+        /tmp/server.key \
+        /tmp/server.crt
+}
+
+function add_client {
+    name=$1
+    ttl=$2
+
+    export addr=$(curl -s https://myip.dkrv.me)
+    if [ -z "$addr" ]; then
+        echo "Failed to get public IP address"
+        exit 1
+    fi
+
+    mkdir -p /etc/openvpn/clients
+
+    echo "Generating client certificate..."
+    export cn=$name
+    export constraints="CA:FALSE"
+    envsubst < $setup/req.conf > /tmp/req.conf
+    openssl req -new \
+        -nodes \
+        -config /tmp/req.conf \
+        -keyout /tmp/client.key \
+        -out /tmp/client.csr
+    openssl x509 -req \
+        -CA $configs/ca.crt \
+        -CAkey $configs/ca.key \
+        -CAcreateserial \
+        -extfile /tmp/req.conf \
+        -extensions ca_ext \
+        -in /tmp/client.csr \
+        -days $ttl \
+        -out /tmp/client.crt
+
+    export key="$(cat /tmp/client.key)"
+    export cert="$(cat /tmp/client.crt)"
+    export ca="$(cat $configs/ca.crt)"
+    export dh="$(cat $configs/dh.pem)"
+    envsubst < $setup/client.conf > $configs/clients/$name.conf
+    echo "New client config file: $configs/clients/$name.conf"
+
+    # Cleanup
+    rm -f /tmp/req.conf \
+        /tmp/client.csr \
+        /tmp/client.crt \
+        /tmp/client.key
+}
+
+function revoke_client {
+    name=$1
+
+    if [ ! -f $configs/index.txt ]; then
+        touch $configs/index.txt
+    fi
+    if [ ! -f $configs/crlnumber ]; then
+        echo 0 > $configs/crlnumber
+    fi
+
+    # Get client certificate from config
+    awk '/<cert>/,/<\/cert>/ {if (!/<cert>/ && !/<\/cert>/) print}' \
+        $configs/clients/$name.conf > /tmp/$name.crt
+
+    echo "Revoking cert for CN=$name..."
+    openssl ca \
+        -config $setup/ca.conf \
+        -revoke /tmp/$name.crt \
+        -keyfile $configs/ca.key \
+        -cert $configs/ca.crt
+
+    echo "Generating CRL..."
+    openssl ca \
+        -config $setup/ca.conf \
+        -gencrl \
+        -out $configs/crl.pem \
+        -cert $configs/ca.crt
+
+    # Cleanup
+    rm -f /tmp/$name.crt
+}
+
+case $cmd in
+    run-server)
+        if [ $# -gt 2 ]; then
+            echo "Usage: $0 run-server [SUBNET]"
+            exit 1
+        fi
+        if [ $# -eq 2 ]; then
+            subnet=$2
+        fi
+        export subnet # make it visible in templates
+
+        # Init on first run
+        if [ ! -f $configs/server.conf ]; then
+            echo "Running server init..."
+            init_server
+        fi
+
+        echo "Starting OpenVPN server..."
+        iptables -t nat -A POSTROUTING -s $subnet/24 -o eth0 -j MASQUERADE
+        openvpn $configs/server.conf
+    ;;
+    add-client)
+        if [[ $# -ne 3 ]]; then
+            echo "Usage: $0 add-client [NAME] [TTL_DAYS]"
+            exit 1
+        fi
+        name=$2
+        ttl=$3
+        add_client $name $ttl
+    ;;
+    revoke-client)
+        if [[ $# -ne 2 ]]; then
+            echo "Usage: $0 revoke-client [NAME]"
+            exit 1
+        fi
+        revoke_client "$2"
+    ;;
+    *)
+        echo "Unknown command"
+        exit 1
+    ;;
+esac

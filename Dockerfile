@@ -10,17 +10,22 @@ RUN apt update && \
         gettext-base \
         openssl \
         iptables && \
-    mkdir -p /var/log/openvpn
+    mkdir -p /var/log/openvpn \
+        /etc/openvpn \
+        /etc/openvpn-setup
 
-COPY vpn.sh /vpn/
-COPY openvpn_client.conf \
-    openvpn_server.conf \
-    openssl_ca.conf \
-    openssl_node.conf \
-    /vpn/
+COPY /scripts/vpn \
+    /scripts/run-server \
+    /scripts/add-client \
+    /scripts/revoke-client \
+    /usr/local/bin/
+COPY openvpn/client.conf \
+    openvpn/server.conf \
+    openssl/ca.conf \
+    openssl/req.conf \
+    /etc/openvpn-setup/
 
 VOLUME /etc/openvpn
-
 EXPOSE 1194/udp
 
-CMD ["/vpn/vpn.sh", "run-server"]
+CMD ["run-server"]
