@@ -4,7 +4,12 @@
 
 OpenVPN with a simple init process inside a docker container.
 
-
+1. [Server](#server)
+2. [Clients](#clients)
+    1. [Add](#add)
+    2. [Connect](#connect)
+    3. [Revoke](#revoke)
+3. [Development](#development)
 
 ## Server
 
