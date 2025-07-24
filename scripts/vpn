@@ -17,10 +17,6 @@ function init_server {
         mknod /dev/net/tun c 10 200
     fi
 
-    touch $configs/crl.pem
-    touch $configs/index.txt
-    echo 0 > $configs/crlnumber
-
     export cn="openvpn-server"
 
     echo "Generating CA..."
@@ -54,6 +50,16 @@ function init_server {
         -in /tmp/server.csr \
         -days 3650 \
         -out /tmp/server.crt
+
+    echo "Generating CRL..."
+    touch $configs/index.txt
+    echo "1000" > $configs/crlnumber
+    echo "1000" > $configs/serial
+    openssl ca \
+        -config $setup/ca.conf \
+        -gencrl \
+        -out $configs/crl.pem \
+        -cert $configs/ca.crt
 
     export key="$(cat /tmp/server.key)"
     export cert="$(cat /tmp/server.crt)"
