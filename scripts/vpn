@@ -17,6 +17,7 @@ function init_server {
         mknod /dev/net/tun c 10 200
     fi
 
+    touch $configs/crl.pem
     touch $configs/index.txt
     echo 0 > $configs/crlnumber
 
