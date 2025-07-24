@@ -46,7 +46,7 @@ certificates. Just take it to your client machine and run with your client app.
 Ubuntu example:
 
 ```sh
-sudo apt install openvpn openvpn-systemd-resolved
+sudo apt install openvpn
 sudo openvpn --config client.conf
 ```
 
