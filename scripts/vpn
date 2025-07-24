@@ -17,6 +17,9 @@ function init_server {
         mknod /dev/net/tun c 10 200
     fi
 
+    touch $configs/index.txt
+    echo 0 > $configs/crlnumber
+
     export cn="openvpn-server"
 
     echo "Generating CA..."
@@ -111,13 +114,6 @@ function add_client {
 
 function revoke_client {
     name=$1
-
-    if [ ! -f $configs/index.txt ]; then
-        touch $configs/index.txt
-    fi
-    if [ ! -f $configs/crlnumber ]; then
-        echo 0 > $configs/crlnumber
-    fi
 
     # Get client certificate from config
     awk '/<cert>/,/<\/cert>/ {if (!/<cert>/ && !/<\/cert>/) print}' \
