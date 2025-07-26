@@ -26,6 +26,6 @@ COPY openvpn/client.conf \
     /etc/openvpn-setup/
 
 VOLUME /etc/openvpn
-EXPOSE 1194/udp
+EXPOSE 5528/udp
 
 CMD ["run-server"]

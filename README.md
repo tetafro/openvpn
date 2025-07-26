@@ -4,6 +4,8 @@
 
 OpenVPN with a simple init process inside a docker container.
 
+The server uses non-standard port - 5528.
+
 1. [Server](#server)
 2. [Clients](#clients)
     1. [Add](#add)
@@ -21,7 +23,7 @@ mkdir vpn
 docker run --detach \
     --privileged \
     --restart unless-stopped \
-    --publish 1194:1194/udp \
+    --publish 5528:5528/udp \
     --volume $(pwd)/vpn:/etc/openvpn \
     --name openvpn \
     ghcr.io/tetafro/openvpn
@@ -66,7 +68,7 @@ docker build -t localhost/openvpn .
 mkdir -p conf
 docker run --rm -it \
     --privileged \
-    --publish 1194:1194/udp \
+    --publish 5528:5528/udp \
     --volume $(pwd)/conf:/etc/openvpn \
     --name openvpn \
     localhost/openvpn
