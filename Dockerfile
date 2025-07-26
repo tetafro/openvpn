@@ -22,7 +22,9 @@ COPY /scripts/vpn \
 COPY openvpn/client.conf \
     openvpn/server.conf \
     openssl/ca.conf \
-    openssl/req.conf \
+    openssl/req_ca.conf \
+    openssl/req_server.conf \
+    openssl/req_client.conf \
     /etc/openvpn-setup/
 
 VOLUME /etc/openvpn
