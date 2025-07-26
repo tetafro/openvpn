@@ -47,7 +47,7 @@ function init_server {
         -CAkey $configs/ca.key \
         -CAcreateserial \
         -extfile /tmp/req.conf \
-        -extensions ca_ext \
+        -extensions x509_ext \
         -in /tmp/server.csr \
         -days 3650 \
         -out /tmp/server.crt
@@ -100,7 +100,7 @@ function add_client {
         -CAkey $configs/ca.key \
         -CAcreateserial \
         -extfile /tmp/req.conf \
-        -extensions ca_ext \
+        -extensions x509_ext \
         -in /tmp/client.csr \
         -days $ttl \
         -out /tmp/client.crt
