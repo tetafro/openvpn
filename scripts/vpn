@@ -111,7 +111,6 @@ function add_client {
     export key="$(cat /tmp/client.key)"
     export cert="$(cat /tmp/client.crt)"
     export ca="$(cat $configs/ca.crt)"
-    export dh="$(cat $configs/dh.pem)"
     envsubst < $setup/client.conf > $configs/clients/$name.conf
     echo "New client config file: $configs/clients/$name.conf"
 
