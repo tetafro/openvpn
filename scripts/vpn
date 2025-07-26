@@ -23,8 +23,7 @@ function init_server {
     export cn="openvpn-server"
 
     echo "Generating CA..."
-    export constraints="CA:TRUE, pathlen:0"
-    envsubst < $setup/req.conf > /tmp/req.conf
+    envsubst < $setup/req_ca.conf > /tmp/req.conf
     openssl req -new -x509 \
         -nodes \
         -days 3650 \
@@ -37,8 +36,7 @@ function init_server {
     openssl dhparam -out $configs/dh.pem 2048
 
     echo "Generating server certificate..."
-    export constraints="CA:FALSE"
-    envsubst < $setup/req.conf > /tmp/req.conf
+    envsubst < $setup/req_server.conf > /tmp/req.conf
     openssl req -new \
         -nodes \
         -config /tmp/req.conf \
@@ -91,8 +89,7 @@ function add_client {
 
     echo "Generating client certificate..."
     export cn=$name
-    export constraints="CA:FALSE"
-    envsubst < $setup/req.conf > /tmp/req.conf
+    envsubst < $setup/req_client.conf > /tmp/req.conf
     openssl req -new \
         -nodes \
         -config /tmp/req.conf \
