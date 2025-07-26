@@ -35,14 +35,14 @@ function init_server {
     echo "Generating server certificate..."
     openssl req -new \
         -nodes \
-        -config $setup/req_ca.conf \
+        -config $setup/req_server.conf \
         -keyout /tmp/server.key \
         -out /tmp/server.csr
     openssl x509 -req \
         -CA $configs/ca.crt \
         -CAkey $configs/ca.key \
         -CAcreateserial \
-        -extfile $setup/req_ca.conf \
+        -extfile $setup/req_server.conf \
         -extensions x509_ext \
         -in /tmp/server.csr \
         -days 3650 \
