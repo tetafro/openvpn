@@ -20,14 +20,11 @@ function init_server {
         mknod /dev/net/tun c 10 200
     fi
 
-    export cn="openvpn-server"
-
     echo "Generating CA..."
-    envsubst < $setup/req_ca.conf > /tmp/req.conf
     openssl req -new -x509 \
         -nodes \
         -days 3650 \
-        -config /tmp/req.conf \
+        -config $setup/req_ca.conf \
         -keyout $configs/ca.key \
         -out $configs/ca.crt
     chmod 600 $configs/ca.key
@@ -36,17 +33,16 @@ function init_server {
     openssl dhparam -out $configs/dh.pem 2048
 
     echo "Generating server certificate..."
-    envsubst < $setup/req_server.conf > /tmp/req.conf
     openssl req -new \
         -nodes \
-        -config /tmp/req.conf \
+        -config $setup/req_ca.conf \
         -keyout /tmp/server.key \
         -out /tmp/server.csr
     openssl x509 -req \
         -CA $configs/ca.crt \
         -CAkey $configs/ca.key \
         -CAcreateserial \
-        -extfile /tmp/req.conf \
+        -extfile $setup/req_ca.conf \
         -extensions x509_ext \
         -in /tmp/server.csr \
         -days 3650 \
@@ -69,8 +65,7 @@ function init_server {
     envsubst < $setup/server.conf > $configs/server.conf
 
     # Cleanup
-    rm -f /tmp/req.conf \
-        /tmp/server.csr \
+    rm -f /tmp/server.csr \
         /tmp/server.key \
         /tmp/server.crt
 }
