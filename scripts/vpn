@@ -1,15 +1,18 @@
 #!/bin/bash
 set -euo pipefail
 
-if [[ $# -lt 1 ]]; then
-    echo "USAGE: $0 [run-server|add-client|revoke-client]"
-    exit 1
-fi
-cmd=$1
-
 configs=/etc/openvpn
 setup=/etc/openvpn-setup
 subnet="192.168.23.0"
+last_arg=${!#}
+
+function help {
+    msg=$1
+    if [[ "$last_arg" == "-h" || "$last_arg" == "--help" ]]; then
+        echo "$msg"
+        exit 0
+    fi
+}
 
 function init_server {
     mkdir -p /dev/net
@@ -144,10 +147,18 @@ function revoke_client {
     rm -f /tmp/$name.crt
 }
 
+help "USAGE: $0 [run-server|add-client|revoke-client]"
+if [[ $# -lt 1 ]]; then
+    echo "USAGE: $0 [run-server|add-client|revoke-client]"
+    exit 1
+fi
+cmd=$1
+
 case $cmd in
     run-server)
+        help "USAGE: $0 run-server [SUBNET]"
         if [ $# -gt 2 ]; then
-            echo "Usage: $0 run-server [SUBNET]"
+            echo "USAGE: $0 run-server [SUBNET]"
             exit 1
         fi
         if [ $# -eq 2 ]; then
@@ -166,8 +177,9 @@ case $cmd in
         openvpn $configs/server.conf
     ;;
     add-client)
+        help "USAGE: $0 add-client [NAME] [TTL_DAYS]"
         if [[ $# -ne 3 ]]; then
-            echo "Usage: $0 add-client [NAME] [TTL_DAYS]"
+            echo "USAGE: $0 add-client [NAME] [TTL_DAYS]"
             exit 1
         fi
         name=$2
@@ -175,8 +187,9 @@ case $cmd in
         add_client $name $ttl
     ;;
     revoke-client)
+        help "USAGE: $0 revoke-client [NAME]"
         if [[ $# -ne 2 ]]; then
-            echo "Usage: $0 revoke-client [NAME]"
+            echo "USAGE: $0 revoke-client [NAME]"
             exit 1
         fi
         revoke_client "$2"
